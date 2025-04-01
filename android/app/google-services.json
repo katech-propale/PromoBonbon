@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "916165066124",
+    "firebase_url": "https://promobonbon-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "promobonbon",
+    "storage_bucket": "promobonbon.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:916165066124:android:508446ab4b91812a11eaa9",
+        "android_client_info": {
+          "package_name": "com.promobonbon.driver"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyaH4Xz1UbeWJGkiEDY5fPgLrMNZn3pXQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:916165066124:android:21795f99b0e156e311eaa9",
+        "android_client_info": {
+          "package_name": "com.websicon.promobonbon"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAyaH4Xz1UbeWJGkiEDY5fPgLrMNZn3pXQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
