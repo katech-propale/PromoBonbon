@@ -1,0 +1,2 @@
+/Users/zouhirberrichi/Documents/Projects/PromoBonbon/android/app/.cxx/Debug/3w29s2v2/x86/CMakeFiles/edit_cache.dir
+/Users/zouhirberrichi/Documents/Projects/PromoBonbon/android/app/.cxx/Debug/3w29s2v2/x86/CMakeFiles/rebuild_cache.dir
