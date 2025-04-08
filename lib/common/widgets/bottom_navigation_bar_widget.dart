@@ -1,20 +1,20 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_grocery/common/models/main_navigation_item_model.dart';
 import 'package:flutter_grocery/features/splash/providers/splash_provider.dart';
-import 'package:flutter_grocery/utill/color_resources.dart';
-import 'package:flutter_grocery/utill/dimensions.dart';
+import 'package:flutter_grocery/localization/app_localization.dart';
 import 'package:flutter_grocery/utill/styles.dart';
 import 'package:provider/provider.dart';
 
 class BottomNavigationBarWidget extends StatelessWidget {
-  const BottomNavigationBarWidget({Key? key}) : super(key: key);
+  const BottomNavigationBarWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
     final SplashProvider splashProvider = Provider.of<SplashProvider>(context);
 
     return Container(
-      height: 56, // Hauteur standard Material Design
+      height: Platform.isIOS ? 90 : 56, // Hauteur standard Material Design
       margin: EdgeInsets.zero,
       padding: EdgeInsets.zero,
       decoration: BoxDecoration(
@@ -52,15 +52,15 @@ class BottomNavigationBarWidget extends StatelessWidget {
           onTap: (int index) => splashProvider.setPageIndex(index),
           items: [
             _buildNavigationBarItem(
-                context, 'Accueil', Icons.home_outlined, Icons.home, 0),
-            _buildNavigationBarItem(context, 'Catégories',
+                context, 'home'.tr, Icons.home_outlined, Icons.home, 0),
+            _buildNavigationBarItem(context, 'my_order'.tr,
                 Icons.category_outlined, Icons.category, 1),
-            _buildNavigationBarItem(context, 'Panier',
+            _buildNavigationBarItem(context, 'shopping_bag'.tr,
                 Icons.shopping_cart_outlined, Icons.shopping_cart, 2),
             _buildNavigationBarItem(
-                context, 'Favoris', Icons.favorite_outline, Icons.favorite, 3),
+                context, 'live_chat'.tr, Icons.message, Icons.favorite, 3),
             _buildNavigationBarItem(
-                context, 'Profil', Icons.person_outline, Icons.person, 4),
+                context, 'profile'.tr, Icons.person_outline, Icons.person, 4),
           ],
         ),
       ),

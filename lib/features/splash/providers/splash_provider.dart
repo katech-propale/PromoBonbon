@@ -21,6 +21,7 @@ import 'package:flutter_grocery/features/menu/screens/setting_screen.dart';
 import 'package:flutter_grocery/features/order/domain/models/offline_payment_model.dart';
 import 'package:flutter_grocery/features/order/screens/order_list_screen.dart';
 import 'package:flutter_grocery/features/order/screens/order_search_screen.dart';
+import 'package:flutter_grocery/features/profile/screens/profile_screen.dart';
 import 'package:flutter_grocery/features/splash/domain/reposotories/splash_repo.dart';
 import 'package:flutter_grocery/features/wallet_and_loyalty/screens/loyalty_screen.dart';
 import 'package:flutter_grocery/features/wallet_and_loyalty/screens/wallet_screen.dart';
@@ -255,18 +256,19 @@ class SplashProvider extends ChangeNotifier {
   void initializeScreenList() {
     _screenList = [
       MainScreenModel(const HomeScreen(), 'home', Images.home),
-      MainScreenModel(
-          const AllCategoriesScreen(), 'all_categories', Images.list),
+      MainScreenModel(const OrderListScreen(), 'my_order', Images.orderList),
       MainScreenModel(const CartScreen(), 'shopping_bag', Images.orderBag),
       MainScreenModel(
+          const ChatScreen(orderModel: null), 'live_chat', Images.chat),
+      MainScreenModel(const ProfileScreen(), 'profile', Images.profile),
+      MainScreenModel(
+          const AllCategoriesScreen(), 'all_categories', Images.list),
+      MainScreenModel(
           const WishListScreen(), 'favourite', Images.favouriteIcon),
-      MainScreenModel(const OrderListScreen(), 'my_order', Images.orderList),
       MainScreenModel(
           const OrderSearchScreen(), 'track_order', Images.orderDetails),
       MainScreenModel(const AddressListScreen(), 'address', Images.location),
       MainScreenModel(const CouponScreen(), 'coupon', Images.coupon),
-      MainScreenModel(
-          const ChatScreen(orderModel: null), 'live_chat', Images.chat),
       MainScreenModel(const SettingsScreen(), 'settings', Images.settings),
       if (_configModel?.walletStatus ?? false)
         MainScreenModel(const WalletScreen(), 'wallet', Images.wallet),

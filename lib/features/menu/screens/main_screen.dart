@@ -116,13 +116,16 @@ class _MainScreenState extends State<MainScreen> {
                       : AppBar(
                           backgroundColor: Theme.of(context).cardColor,
                           leading: IconButton(
-                              icon: Image.asset(Images.moreIcon,
+                              icon: Image.asset(Images.favouriteIcon,
                                   color: Theme.of(context).primaryColor,
                                   height: 30,
                                   width: 30),
                               onPressed: () {
-                                widget.drawerController.toggle();
+                                Navigator.pushNamed(
+                                    context, RouteHelper.getFavoriteRoute());
                               }),
+                          //       widget.drawerController.toggle();
+                          //     }),
                           title: splash.pageIndex == 0
                               ? Row(children: [
                                   Image.asset(Images.appLogo, width: 25),
@@ -209,9 +212,7 @@ class _MainScreenState extends State<MainScreen> {
                     padding: EdgeInsets.zero,
                     child: splash.screenList[splash.pageIndex].screen,
                   ),
-                  bottomNavigationBar: !ResponsiveHelper.isDesktop(context)
-                      ? const BottomNavigationBarWidget()
-                      : null,
+                  bottomNavigationBar: const BottomNavigationBarWidget(),
                   resizeToAvoidBottomInset: false,
                 ),
               ),

@@ -1,10 +1,13 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_grocery/common/enums/data_source_enum.dart';
 import 'package:flutter_grocery/common/enums/footer_type_enum.dart';
 import 'package:flutter_grocery/common/models/config_model.dart';
+import 'package:flutter_grocery/common/models/product_model.dart';
 import 'package:flutter_grocery/common/providers/localization_provider.dart';
 import 'package:flutter_grocery/common/providers/product_provider.dart';
 import 'package:flutter_grocery/common/widgets/footer_web_widget.dart';
+import 'package:flutter_grocery/common/widgets/product_widget.dart';
 import 'package:flutter_grocery/common/widgets/title_widget.dart';
 import 'package:flutter_grocery/common/widgets/web_app_bar_widget.dart';
 import 'package:flutter_grocery/features/auth/providers/auth_provider.dart';
@@ -16,6 +19,7 @@ import 'package:flutter_grocery/features/home/widgets/banners_widget.dart';
 import 'package:flutter_grocery/features/home/widgets/category_web_widget.dart';
 import 'package:flutter_grocery/features/home/widgets/flash_deal_home_card_widget.dart';
 import 'package:flutter_grocery/features/home/widgets/home_item_widget.dart';
+import 'package:flutter_grocery/features/home/widgets/marquee_widget.dart';
 import 'package:flutter_grocery/features/splash/providers/splash_provider.dart';
 import 'package:flutter_grocery/features/wishlist/providers/wishlist_provider.dart';
 import 'package:flutter_grocery/helper/responsive_helper.dart';
@@ -31,52 +35,60 @@ class HomeScreen extends StatefulWidget {
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 
-  static Future<void> loadData(bool reload, BuildContext context, {bool fromLanguage = false}) async {
-    final productProvider = Provider.of<ProductProvider>(context, listen: false);
-    final flashDealProvider = Provider.of<FlashDealProvider>(context, listen: false);
+  static Future<void> loadData(bool reload, BuildContext context,
+      {bool fromLanguage = false}) async {
+    final productProvider =
+        Provider.of<ProductProvider>(context, listen: false);
+    final flashDealProvider =
+        Provider.of<FlashDealProvider>(context, listen: false);
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    final withLListProvider = Provider.of<WishListProvider>(context, listen: false);
-    final localizationProvider = Provider.of<LocalizationProvider>(context, listen: false);
+    final withLListProvider =
+        Provider.of<WishListProvider>(context, listen: false);
+    final localizationProvider =
+        Provider.of<LocalizationProvider>(context, listen: false);
 
-    ConfigModel? config = Provider.of<SplashProvider>(context, listen: false).configModel;
-    if(reload) {
-      Provider.of<SplashProvider>(context, listen: false).initConfig(source: DataSourceEnum.client);
+    ConfigModel? config =
+        Provider.of<SplashProvider>(context, listen: false).configModel;
+    if (reload) {
+      Provider.of<SplashProvider>(context, listen: false)
+          .initConfig(source: DataSourceEnum.client);
       Provider.of<SplashProvider>(context, listen: false).getDeliveryInfo();
     }
-    if(fromLanguage && (authProvider.isLoggedIn() || (config?.isGuestCheckout ?? false) )) {
+    if (fromLanguage &&
+        (authProvider.isLoggedIn() || (config?.isGuestCheckout ?? false))) {
       localizationProvider.changeLanguage();
     }
-    Provider.of<CategoryProvider>(context, listen: false).getCategoryList(context, reload);
+    Provider.of<CategoryProvider>(context, listen: false)
+        .getCategoryList(context, reload);
 
-    Provider.of<BannerProvider>(context, listen: false).getBannerList(context, reload);
+    Provider.of<BannerProvider>(context, listen: false)
+        .getBannerList(context, reload);
 
-
-
-    if(productProvider.dailyProductModel == null || reload) {
-      productProvider.getItemList(1, isUpdate: false, productType: ProductType.dailyItem);
-
+    if (productProvider.dailyProductModel == null || reload) {
+      productProvider.getItemList(1,
+          isUpdate: false, productType: ProductType.dailyItem);
     }
 
-    if(productProvider.featuredProductModel == null || reload) {
-      productProvider.getItemList(1, isUpdate: false, productType: ProductType.featuredItem);
-
+    if (productProvider.featuredProductModel == null || reload) {
+      productProvider.getItemList(1,
+          isUpdate: false, productType: ProductType.featuredItem);
     }
 
-    if(productProvider.mostViewedProductModel == null || reload) {
-      productProvider.getItemList(1, isUpdate: false, productType: ProductType.mostReviewed);
-
+    if (productProvider.mostViewedProductModel == null || reload) {
+      productProvider.getItemList(1,
+          isUpdate: false, productType: ProductType.mostReviewed);
     }
 
     productProvider.getAllProductList(1, reload, isUpdate: false);
 
-    if(authProvider.isLoggedIn()) {
+    if (authProvider.isLoggedIn()) {
       withLListProvider.getWishListProduct();
     }
 
-    if((config?.flashDealProductStatus ?? false) && (flashDealProvider.flashDealModel == null || reload)) {
+    if ((config?.flashDealProductStatus ?? false) &&
+        (flashDealProvider.flashDealModel == null || reload)) {
       flashDealProvider.getFlashDealProducts(1, isUpdate: false);
     }
-
   }
 }
 
@@ -87,8 +99,28 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
+    final allProduct =
+        Provider.of<ProductProvider>(context).allProductModel?.products ?? [];
+    final reviewProduct = Provider.of<ProductProvider>(context)
+            .mostViewedProductModel
+            ?.products ??
+        [];
+
+    // Compléter reviewProduct avec des produits de allProduct si nécessaire
+    final List<Product> completeReviewProduct = [...reviewProduct];
+    if (completeReviewProduct.length < 6 && allProduct.isNotEmpty) {
+      // Filtrer allProduct pour ne pas ajouter de doublons
+      final productsToAdd = allProduct
+          .where((product) =>
+              !completeReviewProduct.any((p) => p.id == product.id))
+          .take(6 - completeReviewProduct.length)
+          .toList();
+
+      completeReviewProduct.addAll(productsToAdd);
+    }
 
     return RefreshIndicator(
       onRefresh: () async {
@@ -96,106 +128,173 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       backgroundColor: Theme.of(context).primaryColor,
       child: Scaffold(
-        appBar: ResponsiveHelper.isDesktop(context) ? const PreferredSize(preferredSize: Size.fromHeight(120), child: WebAppBarWidget())  : null,
+        appBar: ResponsiveHelper.isDesktop(context)
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(120), child: WebAppBarWidget())
+            : null,
         body: CustomScrollView(controller: scrollController, slivers: [
-          SliverToBoxAdapter(child: Center(child: SizedBox(
+          SliverToBoxAdapter(
+              child: Center(
+                  child: SizedBox(
             width: Dimensions.webScreenWidth,
             child: Column(children: [
-
-              Consumer<BannerProvider>(builder: (context, banner, child) {
-                return (banner.bannerList?.isEmpty ?? false) ? const SizedBox() : const BannersWidget();
-              }),
-
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 10),
+                width: double.infinity,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: const MarqueeWidget(
+                  text:
+                      "COUPON: -10% sur la première commande! Livraison gratuite à partir de 50€ d'achat. Profitez-en vite !",
+                  textStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                  ),
+                  speed: 50,
+                ),
+              ),
+              // Consumer<BannerProvider>(builder: (context, banner, child) {
+              //   return (banner.bannerList?.isEmpty ?? false)
+              //       ? const SizedBox()
+              //       : const BannersWidget();
+              // }),
 
               /// Category
               Padding(
                 padding: EdgeInsets.only(
-                  bottom: ResponsiveHelper.isDesktop(context) ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeSmall,
+                  bottom: ResponsiveHelper.isDesktop(context)
+                      ? Dimensions.paddingSizeLarge
+                      : Dimensions.paddingSizeSmall,
                 ),
                 child: const CategoryWidget(),
               ),
 
-
               /// Flash Deal
               Selector<SplashProvider, ConfigModel?>(
-                  selector: (ctx, splashProvider)=> splashProvider.configModel,
+                  selector: (ctx, splashProvider) => splashProvider.configModel,
                   builder: (context, configModel, _) {
                     return (configModel?.flashDealProductStatus ?? false)
                         ? const FlashDealHomeCardWidget()
                         : const SizedBox();
-                  }
-              ),
+                  }),
 
-
-              Consumer<ProductProvider>(builder: (context, productProvider, child) {
-                bool isDalyProduct = (productProvider.dailyProductModel == null || (productProvider.dailyProductModel?.products?.isNotEmpty ?? false));
-                bool isFeaturedProduct = (productProvider.featuredProductModel == null || ( productProvider.featuredProductModel?.products?.isNotEmpty ?? false));
-                bool isMostViewedProduct = (productProvider.mostViewedProductModel == null || (productProvider.mostViewedProductModel?.products?.isNotEmpty ?? false));
+              Consumer<ProductProvider>(
+                  builder: (context, productProvider, child) {
+                bool isDalyProduct = (productProvider.dailyProductModel ==
+                        null ||
+                    (productProvider.dailyProductModel?.products?.isNotEmpty ??
+                        false));
+                bool isFeaturedProduct =
+                    (productProvider.featuredProductModel == null ||
+                        (productProvider
+                                .featuredProductModel?.products?.isNotEmpty ??
+                            false));
+                bool isMostViewedProduct =
+                    (productProvider.mostViewedProductModel == null ||
+                        (productProvider
+                                .mostViewedProductModel?.products?.isNotEmpty ??
+                            false));
 
                 return Column(children: [
-                  isDalyProduct ?  Column(children: [
-                    TitleWidget(title: getTranslated('daily_needs', context) ,onTap: () {
-                      Navigator.pushNamed(context, RouteHelper.getHomeItemRoute(ProductType.dailyItem));
-                    }),
-
-                    HomeItemWidget(productList: productProvider.dailyProductModel?.products),
-
-                  ]) : const SizedBox(),
-
-                  if(isFeaturedProduct) Selector<SplashProvider, ConfigModel?>(
-                      selector: (ctx, splashProvider)=> splashProvider.configModel,
-                      builder: (context, configModel, _) {
-                        return (configModel?.featuredProductStatus ?? false)
-                            ? Column(children: [
-                          TitleWidget(title: getTranslated(ProductType.featuredItem, context) ,onTap: () {
-                            Navigator.pushNamed(context, RouteHelper.getHomeItemRoute(ProductType.featuredItem));
-                          }),
-
-                          HomeItemWidget(productList: productProvider.featuredProductModel?.products, isFeaturedItem: true),
+                  isDalyProduct
+                      ? Column(children: [
+                          TitleWidget(
+                              title: getTranslated('daily_needs', context),
+                              onTap: () {
+                                Navigator.pushNamed(
+                                    context,
+                                    RouteHelper.getHomeItemRoute(
+                                        ProductType.dailyItem));
+                              }),
+                          HomeItemWidget(
+                              productList:
+                                  productProvider.dailyProductModel?.products),
                         ])
-                            : const SizedBox();
-                      }
-                  ),
-
-                  if(isMostViewedProduct) Selector<SplashProvider, ConfigModel?>(
-                      selector: (ctx, splashProvider)=> splashProvider.configModel,
-                      builder: (context, configModel, _) {
-                        return (configModel?.mostReviewedProductStatus ?? false)
-                            ? Column(children: [
-                          TitleWidget(title: getTranslated(ProductType.mostReviewed, context) ,onTap: () {
-                            Navigator.pushNamed(context, RouteHelper.getHomeItemRoute(ProductType.mostReviewed));
-                          }),
-
-                          HomeItemWidget(productList: productProvider.mostViewedProductModel?.products),
-
-                        ])
-                            : const SizedBox();
-                      }
-                  ),
-
-
+                      : const SizedBox(),
+                  if (isFeaturedProduct)
+                    Selector<SplashProvider, ConfigModel?>(
+                        selector: (ctx, splashProvider) =>
+                            splashProvider.configModel,
+                        builder: (context, configModel, _) {
+                          return (configModel?.featuredProductStatus ?? false)
+                              ? Column(children: [
+                                  TitleWidget(
+                                      title: getTranslated(
+                                          ProductType.featuredItem, context),
+                                      onTap: () {
+                                        Navigator.pushNamed(
+                                            context,
+                                            RouteHelper.getHomeItemRoute(
+                                                ProductType.featuredItem));
+                                      }),
+                                  HomeItemWidget(
+                                      productList: productProvider
+                                          .featuredProductModel?.products,
+                                      isFeaturedItem: true),
+                                ])
+                              : const SizedBox();
+                        }),
+                  if (isMostViewedProduct)
+                    CarouselSlider(
+                      options: CarouselOptions(
+                        height: 340, // Hauteur du carrousel
+                        enlargeCenterPage: true, // Agrandit l'image centrale
+                        viewportFraction:
+                            0.5, // Nombre d'éléments visibles par page
+                        autoPlay: true, // Active le défilement automatique
+                        autoPlayInterval: const Duration(
+                            seconds: 3), // Intervalle du défilement
+                        aspectRatio: 16 / 9, // Ratio d'aspect
+                        enableInfiniteScroll: true, // Défilement infini
+                      ),
+                      items: completeReviewProduct
+                          .map((product) => ProductWidget(
+                                product: product,
+                                isCenter: true,
+                                isGrid: true,
+                              ))
+                          .toList(),
+                    ),
+                  // Selector<SplashProvider, ConfigModel?>(
+                  //     selector: (ctx, splashProvider) =>
+                  //         splashProvider.configModel,
+                  //     builder: (context, configModel, _) {
+                  //       return (configModel?.mostReviewedProductStatus ??
+                  //               false)
+                  //           ? Column(children: [
+                  //               TitleWidget(
+                  //                   title: getTranslated(
+                  //                       ProductType.mostReviewed, context),
+                  //                   onTap: () {
+                  //                     Navigator.pushNamed(
+                  //                         context,
+                  //                         RouteHelper.getHomeItemRoute(
+                  //                             ProductType.mostReviewed));
+                  //                   }),
+                  //               HomeItemWidget(
+                  //                   productList: productProvider
+                  //                       .mostViewedProductModel?.products),
+                  //             ])
+                  //           : const SizedBox();
+                  //     }),
                 ]);
               }),
 
-
-              ResponsiveHelper.isMobilePhone() ? const SizedBox(height: 10) : const SizedBox.shrink(),
+              ResponsiveHelper.isMobilePhone()
+                  ? const SizedBox(height: 10)
+                  : const SizedBox.shrink(),
 
               AllProductListWidget(scrollController: scrollController),
-
-
             ]),
           ))),
-
-          if(ResponsiveHelper.isWeb())...[
+          if (ResponsiveHelper.isWeb()) ...[
             const FooterWebWidget(footerType: FooterType.sliver)
           ],
-
-
-
         ]),
       ),
     );
   }
 }
-
-

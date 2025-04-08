@@ -16,23 +16,24 @@ import 'package:url_launcher/url_launcher_string.dart';
 class HtmlViewerScreen extends StatelessWidget {
   final HtmlType htmlType;
   const HtmlViewerScreen({super.key, required this.htmlType});
-  
+
   @override
   Widget build(BuildContext context) {
-    final configModel = Provider.of<SplashProvider>(context, listen: false).configModel;
+    final configModel =
+        Provider.of<SplashProvider>(context, listen: false).configModel;
     String data = 'no_result_found';
     String appBarText = '';
 
     switch (htmlType) {
-      case HtmlType.termsAndCondition :
+      case HtmlType.termsAndCondition:
         data = configModel!.termsAndConditions ?? '';
         appBarText = 'terms_and_condition';
         break;
-      case HtmlType.aboutUs :
+      case HtmlType.aboutUs:
         data = configModel!.aboutUs ?? '';
         appBarText = 'about_us';
         break;
-      case HtmlType.privacyPolicy :
+      case HtmlType.privacyPolicy:
         data = configModel!.privacyPolicy ?? '';
         appBarText = 'privacy_policy';
         break;
@@ -54,52 +55,73 @@ class HtmlViewerScreen extends StatelessWidget {
         break;
     }
 
-
-    if(data.isNotEmpty) {
+    if (data.isNotEmpty) {
       data = data.replaceAll('href=', 'target="_blank" href=');
     }
 
     return Scaffold(
-      appBar: (ResponsiveHelper.isDesktop(context)
-          ? const PreferredSize(preferredSize: Size.fromHeight(120), child: WebAppBarWidget())
-          : ResponsiveHelper.isMobilePhone() ? null : AppBarBaseWidget(
-        title: appBarText.tr,
-      )) as PreferredSizeWidget?,
-      body: SingleChildScrollView(child: Column(children: [
-        ConstrainedBox(
-          constraints: BoxConstraints(minHeight: ResponsiveHelper.isDesktop(context)
-              ? MediaQuery.of(context).size.height - 400 : MediaQuery.of(context).size.height),
-          child: Container(
-            width: 1170,
-            color: Theme.of(context).canvasColor,
-            child:  SingleChildScrollView(
-              padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-              physics: const BouncingScrollPhysics(),
-              child: Column(children: [
-                ResponsiveHelper.isDesktop(context)
-                    ? Text(appBarText.tr, style: poppinsBold.copyWith(fontSize: 28,color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.6)))
-                    : const SizedBox.shrink(),
-
-                Padding(
-                  padding: ResponsiveHelper.isDesktop(context)
-                      ? const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeDefault,vertical: Dimensions.paddingSizeSmall)
-                      : const EdgeInsets.all(0.0),
-                  child: HtmlWidget(
-                    data,
-                    key: Key(htmlType.toString()),
-                    textStyle: poppinsRegular.copyWith(color: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.6)),
-                    onTapUrl: (String url){
-                      return launchUrlString(url);
-                    },
+      appBar: AppBar(
+        foregroundColor: Theme.of(context).primaryColor,
+        title: Text('terms_and_condition'.tr,
+            style: TextStyle(
+                color: Theme.of(context).primaryColor,
+                fontSize: Dimensions.fontSizeLarge,
+                fontWeight: FontWeight.bold)),
+      ),
+      // appBar: (ResponsiveHelper.isDesktop(context)
+      //     ? const PreferredSize(preferredSize: Size.fromHeight(120), child: WebAppBarWidget())
+      //     : ResponsiveHelper.isMobilePhone() ? null : AppBarBaseWidget(
+      //   title: appBarText.tr,
+      // )) as PreferredSizeWidget?,
+      body: SingleChildScrollView(
+        child: Column(children: [
+          ConstrainedBox(
+            constraints: BoxConstraints(
+                minHeight: ResponsiveHelper.isDesktop(context)
+                    ? MediaQuery.of(context).size.height - 400
+                    : MediaQuery.of(context).size.height),
+            child: Container(
+              width: 1170,
+              color: Theme.of(context).canvasColor,
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                physics: const BouncingScrollPhysics(),
+                child: Column(children: [
+                  ResponsiveHelper.isDesktop(context)
+                      ? Text(appBarText.tr,
+                          style: poppinsBold.copyWith(
+                              fontSize: 28,
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge
+                                  ?.color
+                                  ?.withOpacity(0.6)))
+                      : const SizedBox.shrink(),
+                  Padding(
+                    padding: ResponsiveHelper.isDesktop(context)
+                        ? const EdgeInsets.symmetric(
+                            horizontal: Dimensions.paddingSizeDefault,
+                            vertical: Dimensions.paddingSizeSmall)
+                        : const EdgeInsets.all(0.0),
+                    child: HtmlWidget(
+                      data,
+                      key: Key(htmlType.toString()),
+                      textStyle: poppinsRegular.copyWith(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodyLarge
+                              ?.color
+                              ?.withOpacity(0.6)),
+                      onTapUrl: (String url) {
+                        return launchUrlString(url);
+                      },
+                    ),
                   ),
-                ),
-              ]),
+                ]),
+              ),
             ),
           ),
-        ),
-
-        const FooterWebWidget(footerType: FooterType.nonSliver),
-
+          const FooterWebWidget(footerType: FooterType.nonSliver),
         ]),
       ),
     );
